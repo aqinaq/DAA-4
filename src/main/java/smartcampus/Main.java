@@ -8,33 +8,31 @@ public class Main {
         Metrics metrics = new Metrics();
 
         Graph g = Graph.loadFromResource("tasks.json");
-        System.out.println("Loaded graph: n=" + g.n + " directed=" + g.directed);
+        System.out.println("Loaded graph: n=" + g.n + ", directed=" + g.directed + ", source=" + g.source);
 
-        // scc
-        metrics.startTimer();
-        TarjanSCC tarjan = new TarjanSCC(g);
+        // tarjan scc
+        metrics.reset();
+        TarjanSCC tarjan = new TarjanSCC(g, metrics);
         List<List<Integer>> sccs = tarjan.run();
-        metrics.stopTimer();
 
-        System.out.println("\nSCCs (" + sccs.size() + "):");
+        System.out.println("\nSCCs (" + sccs.size() + " components):");
         for (List<Integer> comp : sccs)
             System.out.println("  " + comp);
-        System.out.println(metrics);
+        System.out.println("Metrics (SCC): " + metrics);
 
         // condensation DAG
         CondensationGraph cg = new CondensationGraph(g, sccs);
         Graph dag = cg.toGraph();
+        System.out.println("\nCondensation DAG has " + dag.n + " nodes.");
 
-        // topological sort on condensation DAG
+        // topological sort of condensation DAG
         metrics.reset();
-        metrics.startTimer();
-        List<Integer> compTopo = KahnTopologicalSort.sort(dag);
-        metrics.stopTimer();
+        List<Integer> compTopo = KahnTopologicalSort.sort(dag, metrics);
         System.out.println("\nTopological order of SCC components:");
         System.out.println(compTopo);
-        System.out.println(metrics);
+        System.out.println("Metrics (Topological Sort): " + metrics);
 
-        // topological order to original nodes
+        // component topo order to original nodes
         List<Integer> nodeTopo = new ArrayList<>();
         for (int compId : compTopo)
             nodeTopo.addAll(cg.sccs.get(compId));
@@ -43,19 +41,17 @@ public class Main {
 
         // DAG shortest and longest paths
         metrics.reset();
-        metrics.startTimer();
-        double[] shortest = DAGShortestPaths.shortest(dag, g.source, compTopo);
-        double[] longest = DAGShortestPaths.longest(dag, g.source, compTopo);
-        metrics.stopTimer();
+        double[] shortest = DAGShortestPaths.shortest(dag, g.source, compTopo, metrics);
+        double[] longest = DAGShortestPaths.longest(dag, g.source, compTopo, metrics);
 
-        System.out.println("\nShortest path distances from " + g.source + ":");
+        System.out.println("\nShortest path distances from source " + g.source + ":");
         for (int i = 0; i < dag.n; i++)
             System.out.printf("  %d -> %.1f\n", i, shortest[i]);
 
-        System.out.println("\nLongest path distances from " + g.source + ":");
+        System.out.println("\nLongest path distances from source " + g.source + ":");
         for (int i = 0; i < dag.n; i++)
             System.out.printf("  %d -> %.1f\n", i, longest[i]);
 
-        System.out.println(metrics);
+        System.out.println("Metrics (DAG-SP): " + metrics);
     }
 }
