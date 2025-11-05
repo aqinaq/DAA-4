@@ -1,5 +1,3 @@
-You're absolutely right! Let me fix the timing to nanoseconds and merge everything into one comprehensive report.
-
 # Smart Campus Scheduling - Graph Algorithms Report
 
 ## Project Overview
@@ -260,4 +258,3 @@ Graph: 14 nodes, 54 edges → SCC Time: 80,000 ns
 1. **Production Readiness**: Suitable for real-time processing of graphs up to 30 nodes
 2. **Scalability Path**: For larger graphs, implement iterative SCC and memory monitoring
 3. **Integration**: Code quality and performance adequate for smart campus scheduling systems
-=
